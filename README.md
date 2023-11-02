@@ -53,7 +53,7 @@ This project provides a customizable, HomeKit-enabled Lightframe that allows use
 
 1. Open the **Home** app on your iOS device.
 2. Tap on **Add Accessory**.
-3. Scan or enter the setup code: `1111-1111`.
+3. Scan or enter the setup code: `3333-3333`.
 
 ## Usage
 

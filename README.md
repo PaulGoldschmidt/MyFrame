@@ -71,4 +71,4 @@ This project is open-source and available under the [GNU GENERAL PUBLIC LICENSE]
 
 ## Acknowledgements
 
-Special thanks to Mixiaoxiao (Wang Bin) for the [Arduino-Homekit](https://github.com/Mixiaoxiao/Arduino-Homekit) library which made this project possible.
+Special thanks to Mixiaoxiao (Wang Bin) for the [Arduino-Homekit](https://github.com/Mixiaoxiao/Arduino-HomeKit-ESP8266) library which made this project possible in the first place.

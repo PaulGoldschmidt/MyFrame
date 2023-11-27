@@ -7,6 +7,7 @@
 #include <arduino_homekit_server.h>
 #include "wifi_info.h"
 #include <ESP8266Ping.h>
+#include <EEPROM.h>
 
 #define LOG_D(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);  // Get free memory
 
@@ -30,14 +31,30 @@ const long interval = 300000;      // Interval at which to perform the ping (5 m
 const char* host = "google.com";
 const int httpPort = 80;
 
+const int addrWarmIntensity = 0;            // EEPROM address for warmIntensity
+const int addrColdIntensity = sizeof(int);  // EEPROM address for coldIntensity
+
 void setup() {
+  int savedWarmIntensity = 0;
+  int savedColdIntensity = 0;
+
   Serial.begin(115200);
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
   wifi_connect();                   // in wifi_info.h
   pinMode(warmPin, OUTPUT);
   pinMode(coldPin, OUTPUT);
-  digitalWrite(LED_OnboardPin, LOW);
-  delay(1000);
+
+  EEPROM.begin(512);                                  // Emulated EEPROM Size
+  EEPROM.get(addrWarmIntensity, savedWarmIntensity);  // Read values from EEPROM
+  EEPROM.get(addrColdIntensity, savedColdIntensity);
+  EEPROM.end();  // close emulated EEPROM
+  Serial.print("Restored Warm Intensity: ");
+  Serial.println(savedWarmIntensity);
+  Serial.print("Restored Cold Intensity: ");
+  Serial.println(savedColdIntensity);
+
+  analogWrite(warmPin, savedWarmIntensity);  // Write the values to the LED pins
+  analogWrite(coldPin, savedColdIntensity);
   digitalWrite(LED_OnboardPin, HIGH);  // Turn the LED off (NodeMCU onboard LED turns off on HIGH)
   my_homekit_setup();
 }
@@ -62,11 +79,9 @@ extern "C" homekit_characteristic_t cha_color_temperature;
 static uint32_t next_heap_millis = 0;
 
 void my_homekit_setup() {
-
   cha_on.setter = set_on;
   cha_bright.setter = set_bright;
   cha_color_temperature.setter = set_temp;
-
   arduino_homekit_setup(&accessory_config);
 }
 
@@ -119,15 +134,28 @@ void setLEDs(int mired, int brightness) {
   if (is_on == true) {
     int warmIntensity = map(mired, 50, 400, 0, brightness);  // Map the warm intensity for the LED controls
     int coldIntensity = map(mired, 50, 400, brightness, 0);
+    warmIntensity = (warmIntensity < 0) ? 0 : warmIntensity;  // If variable is smaller then zero, set to zero
+    coldIntensity = (coldIntensity < 0) ? 0 : coldIntensity;  // we don't use an unsigned int because of oferv
+
     Serial.print("Warm Value: ");
     Serial.print(warmIntensity);
     Serial.print(" | Cold Value: ");
     Serial.println(coldIntensity);
     analogWrite(warmPin, warmIntensity);
     analogWrite(coldPin, coldIntensity);
+    // Write to EEPROM
+    EEPROM.put(addrWarmIntensity, warmIntensity);
+    EEPROM.put(addrColdIntensity, coldIntensity);
+    Serial.print("Written to EEPROM - Warm intensity: ");
+    Serial.print(warmIntensity);
+    Serial.print(" | Cold intensity: ");
+    Serial.println(coldIntensity);
   } else {
     analogWrite(warmPin, 0);
     analogWrite(coldPin, 0);
+    // Write to EEPROM
+    EEPROM.put(addrWarmIntensity, 0);
+    EEPROM.put(addrColdIntensity, 0);
   }
 }
 

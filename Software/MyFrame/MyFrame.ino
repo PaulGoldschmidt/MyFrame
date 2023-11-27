@@ -27,6 +27,9 @@ float current_hue = 0.0;
 unsigned long previousMillis = 0;  // Stores the last time the ping was performed
 const long interval = 300000;      // Interval at which to perform the ping (5 minutes)
 
+const char* host = "google.com";
+const int httpPort = 80;
+
 void setup() {
   Serial.begin(115200);
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
@@ -133,13 +136,21 @@ void checkInternetAlive() {
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;  // Save the last time a ping was performed
 
-    Serial.println("Pinging 1.1.1.1...");
+    Serial.print("Connecting to ");
+    Serial.println(host);
 
-    if (Ping.ping("1.1.1.1")) {
-      Serial.println("Ping successful!");
-    } else {
-      Serial.println("Ping failed, restarting...");
+    WiFiClient client;
+    unsigned long startMillis = millis();
+    if (!client.connect(host, httpPort)) {
+      Serial.println("Connection failed");
       ESP.restart();
     }
+
+    unsigned long endMillis = millis();
+    Serial.print("Connected in ");
+    Serial.print(endMillis - startMillis);
+    Serial.println(" milliseconds");
+
+    client.stop();
   }
 }

@@ -6,7 +6,6 @@
 #include <Arduino.h>
 #include <arduino_homekit_server.h>
 #include "wifi_info.h"
-#include <ESP8266Ping.h>
 
 #define LOG_D(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);  // Get free memory
 

@@ -2,12 +2,13 @@
  * MyFrame Version 1
  */
 
-
+#include "wifi_info.h"
 #include <Arduino.h>
 #include <arduino_homekit_server.h>
-#include "wifi_info.h"
 #include <ESP8266Ping.h>
 #include <EEPROM.h>
+#include <ESP8266mDNS.h>
+#include <ArduinoOTA.h>
 
 #define LOG_D(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);  // Get free memory
 
@@ -37,7 +38,7 @@ const int addrColdIntensity = sizeof(int);  // EEPROM address for coldIntensity
 void setup() {
   int savedWarmIntensity = 0;
   int savedColdIntensity = 0;
-
+  
   Serial.begin(115200);
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
   wifi_connect();                   // in wifi_info.h
@@ -57,6 +58,7 @@ void setup() {
   analogWrite(coldPin, savedColdIntensity);
   digitalWrite(LED_OnboardPin, HIGH);  // Turn the LED off (NodeMCU onboard LED turns off on HIGH)
   my_homekit_setup();
+  ota_setup();
 }
 
 void loop() {
@@ -65,6 +67,7 @@ void loop() {
   if (!WiFi.isConnected()) {
     wifi_connect();
   }
+  ArduinoOTA.handle();
   delay(10);
 }
 
@@ -181,4 +184,31 @@ void checkInternetAlive() {
 
     client.stop();
   }
+}
+
+void ota_setup() {
+  ArduinoOTA.setHostname("myesp8266");
+  // Uncomment the next line to set a password for OTA updates
+  // ArduinoOTA.setPassword("otapassword");
+
+  ArduinoOTA.onStart([]() {
+    Serial.println("Start updating");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+
+  ArduinoOTA.begin();
+  Serial.println("Ready for OTA updates");
 }

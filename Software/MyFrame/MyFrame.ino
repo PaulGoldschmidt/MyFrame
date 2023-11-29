@@ -10,12 +10,13 @@
 #include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 
+#define ProjectName "MyFrame"
+
 #define LOG_D(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);  // Get free memory
 
 #define warmPin D1
 #define coldPin D2
 #define LED_OnboardPin 16
-
 
 bool received_sat = false;
 bool received_hue = false;
@@ -38,13 +39,12 @@ const int addrColdIntensity = sizeof(int);  // EEPROM address for coldIntensity
 void setup() {
   int savedWarmIntensity = 0;
   int savedColdIntensity = 0;
-  
+
   Serial.begin(115200);
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
-  wifi_connect();                   // in wifi_info.h
   pinMode(warmPin, OUTPUT);
   pinMode(coldPin, OUTPUT);
-
+  wifi_connect();                   // in wifi_info.h
   EEPROM.begin(512);                                  // Emulated EEPROM Size
   EEPROM.get(addrWarmIntensity, savedWarmIntensity);  // Read values from EEPROM
   EEPROM.get(addrColdIntensity, savedColdIntensity);
@@ -53,7 +53,6 @@ void setup() {
   Serial.println(savedWarmIntensity);
   Serial.print("Restored Cold Intensity: ");
   Serial.println(savedColdIntensity);
-
   analogWrite(warmPin, savedWarmIntensity);  // Write the values to the LED pins
   analogWrite(coldPin, savedColdIntensity);
   digitalWrite(LED_OnboardPin, HIGH);  // Turn the LED off (NodeMCU onboard LED turns off on HIGH)
@@ -147,8 +146,11 @@ void setLEDs(int mired, int brightness) {
     analogWrite(warmPin, warmIntensity);
     analogWrite(coldPin, coldIntensity);
     // Write to EEPROM
+    EEPROM.begin(512);
     EEPROM.put(addrWarmIntensity, warmIntensity);
     EEPROM.put(addrColdIntensity, coldIntensity);
+    EEPROM.commit();
+    EEPROM.end();
     Serial.print("Written to EEPROM - Warm intensity: ");
     Serial.print(warmIntensity);
     Serial.print(" | Cold intensity: ");
@@ -157,8 +159,11 @@ void setLEDs(int mired, int brightness) {
     analogWrite(warmPin, 0);
     analogWrite(coldPin, 0);
     // Write to EEPROM
+    EEPROM.begin(512);
     EEPROM.put(addrWarmIntensity, 0);
     EEPROM.put(addrColdIntensity, 0);
+    EEPROM.commit();
+    EEPROM.end();
   }
 }
 
@@ -187,7 +192,7 @@ void checkInternetAlive() {
 }
 
 void ota_setup() {
-  ArduinoOTA.setHostname("myesp8266");
+  ArduinoOTA.setHostname(ProjectName);
   // Uncomment the next line to set a password for OTA updates
   // ArduinoOTA.setPassword("otapassword");
 

@@ -33,8 +33,8 @@ const long interval = 300000;      // Interval at which to perform the ping (5 m
 const char* host = "google.com";
 const int httpPort = 80;
 
-const int addrWarmIntensity = 0;            // EEPROM address for warmIntensity
-const int addrColdIntensity = sizeof(int);  // EEPROM address for coldIntensity
+const int addrWarmIntensity = 2000;            // EEPROM address for warmIntensity
+const int addrColdIntensity = 2000 + sizeof(int);  // EEPROM address for coldIntensity
 
 void setup() {
   int savedWarmIntensity = 0;

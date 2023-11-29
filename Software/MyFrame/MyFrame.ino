@@ -44,7 +44,7 @@ void setup() {
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
   pinMode(warmPin, OUTPUT);
   pinMode(coldPin, OUTPUT);
-  EEPROM.begin(512);                                  // Emulated EEPROM Size
+  EEPROM.begin(4096);                                  // Emulated EEPROM Size
   EEPROM.get(addrWarmIntensity, savedWarmIntensity);  // Read values from EEPROM
   EEPROM.get(addrColdIntensity, savedColdIntensity);
   EEPROM.end();  // close emulated EEPROM
@@ -145,7 +145,6 @@ void ota_setup() {
     else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
-
   ArduinoOTA.begin();
   Serial.println("Ready for OTA updates");
 }

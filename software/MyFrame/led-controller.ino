@@ -46,7 +46,7 @@ void setLEDs(int mired, int brightness) {
     analogWrite(warmPin, warmIntensity);
     analogWrite(coldPin, coldIntensity);
     // Write to EEPROM
-    EEPROM.begin(512);
+    EEPROM.begin(4096);
     EEPROM.put(addrWarmIntensity, warmIntensity);
     EEPROM.put(addrColdIntensity, coldIntensity);
     EEPROM.commit();
@@ -59,7 +59,7 @@ void setLEDs(int mired, int brightness) {
     analogWrite(warmPin, 0);
     analogWrite(coldPin, 0);
     // Write to EEPROM
-    EEPROM.begin(512);
+    EEPROM.begin(4096);
     EEPROM.put(addrWarmIntensity, 0);
     EEPROM.put(addrColdIntensity, 0);
     EEPROM.commit();

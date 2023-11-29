@@ -44,7 +44,6 @@ void setup() {
   pinMode(LED_OnboardPin, OUTPUT);  // Initialize onboard LED as an output
   pinMode(warmPin, OUTPUT);
   pinMode(coldPin, OUTPUT);
-  wifi_connect();                   // in wifi_info.h
   EEPROM.begin(512);                                  // Emulated EEPROM Size
   EEPROM.get(addrWarmIntensity, savedWarmIntensity);  // Read values from EEPROM
   EEPROM.get(addrColdIntensity, savedColdIntensity);
@@ -55,9 +54,11 @@ void setup() {
   Serial.println(savedColdIntensity);
   analogWrite(warmPin, savedWarmIntensity);  // Write the values to the LED pins
   analogWrite(coldPin, savedColdIntensity);
-  digitalWrite(LED_OnboardPin, HIGH);  // Turn the LED off (NodeMCU onboard LED turns off on HIGH)
+  wifi_connect();                   // in wifi_info.h
+  delay(100);
   my_homekit_setup();
   ota_setup();
+  digitalWrite(LED_OnboardPin, HIGH);  // Turn the LED off (NodeMCU onboard LED turns off on HIGH)
 }
 
 void loop() {
